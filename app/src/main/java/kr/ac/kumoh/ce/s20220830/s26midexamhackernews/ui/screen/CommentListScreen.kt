@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.ui.translation.TranslatableText
 import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.model.NewsItem
 import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.repository.NewsRepository
 import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.viewmodel.CommentViewModel
@@ -56,10 +57,10 @@ fun CommentListScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Text(text)
+            TranslatableText(text = text)
         }
 
-        items(comments) { item ->
+        items(comments, key = { it.id }) { item ->
             CommentItemRow(item) {
                 onNavigateToComment(item.text, item.kids)
             }
@@ -77,7 +78,7 @@ fun CommentItemRow(
         onClick = navigateToComment
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(comment.text)
+            TranslatableText(text = comment.text)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    implementation("com.google.mlkit:translate:17.0.3")
+
     // Navigation 3
     // https://developer.android.com/jetpack/androidx/releases/navigation3?hl=ko
     val nav3Version = "1.2.0"

@@ -8,6 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import com.google.mlkit.nl.translate.TranslateLanguage
+import com.google.mlkit.nl.translate.Translation
+import com.google.mlkit.nl.translate.TranslatorOptions
+import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.ui.translation.LocalTranslator
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
@@ -34,42 +41,53 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
-    val repository = HackerNewsRepository()
+    val repository = remember { HackerNewsRepository() }
+    val translator = remember {
+        Translation.getClient(
+            TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.ENGLISH)
+                .setTargetLanguage(TranslateLanguage.KOREAN)
+                .build()
+        )
+    }
+    DisposableEffect(translator) { onDispose { translator.close() } }
     val backStack = rememberNavBackStack(NewsRoute.TopNews)
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        NavDisplay(
-            modifier = Modifier.padding(innerPadding),
-            backStack = backStack,
+    CompositionLocalProvider(LocalTranslator provides translator) {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            NavDisplay(
+                modifier = Modifier.padding(innerPadding),
+                backStack = backStack,
 
-            entryDecorators = listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator()
-            ),
-            entryProvider = entryProvider  {
-                entry<NewsRoute.TopNews> {
-                    NewsListScreen(
-                        repository = repository,
-                        onNavigateToComment = { title, kids ->
-                            backStack.add(
-                                NewsRoute.NewsComment(title, kids)
-                            )
-                        }
-                    )
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator()
+                ),
+                entryProvider = entryProvider  {
+                    entry<NewsRoute.TopNews> {
+                        NewsListScreen(
+                            repository = repository,
+                            onNavigateToComment = { title, kids ->
+                                backStack.add(
+                                    NewsRoute.NewsComment(title, kids)
+                                )
+                            }
+                        )
+                    }
+                    entry<NewsRoute.NewsComment> { route ->
+                        CommentListScreen(
+                            text = route.text,
+                            kids = route.kids,
+                            repository = repository,
+                            onNavigateToComment = { text, kids ->
+                                backStack.add(
+                                    NewsRoute.NewsComment(text, kids)
+                                )
+                            }
+                        )
+                    }
                 }
-                entry<NewsRoute.NewsComment> { route ->
-                    CommentListScreen(
-                        text = route.text,
-                        kids = route.kids,
-                        repository = repository,
-                        onNavigateToComment = { text, kids ->
-                            backStack.add(
-                                NewsRoute.NewsComment(text, kids)
-                            )
-                        }
-                    )
-                }
-            }
-        )
+            )
+        }
     }
 }

@@ -34,6 +34,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.ui.translation.TranslatableText
 import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.model.NewsItem
 import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.repository.NewsRepository
 import kr.ac.kumoh.ce.s20220830.s26midexamhackernews.viewmodel.TopNewsViewModel
@@ -53,7 +54,7 @@ fun NewsListScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(news) { item ->
+        items(news, key = { it.id }) { item ->
             StoryItemRow(item) {
                 Log.d("NewsListScreen", item.kids.toString())
                 onNavigateToComment(item.title, item.kids)
@@ -75,10 +76,7 @@ fun StoryItemRow(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // 글 제목
-            Text(
-                text = story.title,
-                maxLines = 2
-            )
+            TranslatableText(text = story.title)
             Spacer(modifier = Modifier.height(8.dp))
             // 하단 정보 메타데이터 (추천수, 작성자, 댓글 수)
             Row(
